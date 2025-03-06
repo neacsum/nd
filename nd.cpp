@@ -4,6 +4,10 @@
 #include <iostream>
 #include <conio.h>
 #include <utpp/utpp.h>
+#include <mlib/syncque.h>
+#include <mlib/thread.h>
+
+#define NUMTHREADS 6
 
 bool check(char* num, int digits)
 {
@@ -33,31 +37,57 @@ void print(char* num, int digits)
   putch('\r');
 }
 
-int main(int argc, char** argv)
+struct task {
+  int start_digit;
+  int digits;
+};
+
+mlib::async_queue<task> work(NUMTHREADS);
+
+int worker()
 {
   char num[20];
-  int digits = 8;
-  while (digits < 20)
+  while (1)
   {
-    memset (num, 0, sizeof(num));
+    task todo;
+    work.consume(todo);
+    memset(num, 0, sizeof(num));
     UnitTest::Timer t;
     t.Start();
 
-    num[0] = 1;
-    while (num[0] != 0)
+    num[0] = todo.start_digit;
+    while (num[0] == todo.start_digit)
     {
-      if (check(num, digits))
+      if (check(num, todo.digits))
       {
         std::cout << "stop" << std::endl;
-        print(num, digits);
-        check(num, digits);
+        print(num, todo.digits);
+        check(num, todo.digits);
         exit(0);
       }
-      inc(num, digits);
+      inc(num, todo.digits);
     }
     double tsec = t.GetTimeInMs() / 1000.;
-    std::cout << "Finished " << digits << " digits in " 
-      << std::setprecision(3) << tsec << " sec" << std::endl;
+    std::cout << "Finished job " << todo.start_digit << '-' << todo.digits 
+      << " in " << std::setprecision(3) << tsec << " sec" << std::endl;
+  }
+}
+
+int main(int argc, char** argv)
+{
+  mlib::thread* workers[NUMTHREADS];
+
+  for (int i = 0; i < NUMTHREADS; i++)
+  {
+    workers[i] = new mlib::thread(worker);
+    workers[i]->start();
+  }
+
+  int digits = 8;
+  while (digits < 20)
+  {
+    for (int i = 1; i <= 9; ++i)
+      work.produce({i, digits});
     ++digits;
   }
   return 0;
