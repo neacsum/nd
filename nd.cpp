@@ -7,7 +7,10 @@
 #include <mlib/syncque.h>
 #include <mlib/thread.h>
 
-#define NUMTHREADS 6
+#define NUMTHREADS 10
+
+UnitTest::Timer chrono;
+
 
 bool check(char* num, int digits)
 {
@@ -29,8 +32,10 @@ void inc(char* num, int digits)
 {
   digits--;
   do {
-    num[digits] = (num[digits] + 1) % 10;
-  } while (num[digits] == 0 && --digits >= 0);
+    if (++num[digits] != 10)
+      break;
+    num[digits--] = 0;
+  } while (digits >= 0);
 }
 
 void print(char* num, int digits)
@@ -55,8 +60,6 @@ int worker()
     task todo;
     work.consume(todo);
     memset(num, 0, sizeof(num));
-    UnitTest::Timer t;
-    t.Start();
 
     num[0] = todo.start_digit;
     while (num[0] == todo.start_digit)
@@ -70,9 +73,10 @@ int worker()
       }
       inc(num, todo.digits);
     }
-    double tsec = t.GetTimeInMs() / 1000.;
+    double tsec = chrono.GetTimeInMs() / 1000.;
     std::cout << "Finished job " << todo.start_digit << '-' << todo.digits 
-      << " in " << std::setprecision(3) << tsec << " sec" << std::endl;
+      << " at " << std::setprecision(3) << std::setiosflags (std::ios::fixed) 
+      << tsec << " sec" << std::endl;
   }
 }
 
@@ -85,6 +89,7 @@ int main(int argc, char** argv)
     workers[i] = new mlib::thread(worker);
     workers[i]->start();
   }
+  chrono.Start();
 
   int digits = 8;
   while (digits < 20)
