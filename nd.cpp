@@ -11,15 +11,18 @@
 
 bool check(char* num, int digits)
 {
+  if (num[0] >= num[digits - 1])
+    return false;
+
   long long sum1 = 0;
-  for (int i = 0; i < digits ; i++)
-    sum1 = sum1*10 + num[i];
-
-  long long sum2 = num[digits-1];
-  for (int i = 0; i < digits-1; i++)
-    sum2 = sum2 * 10 + num[i];
-
-  return sum2 == 2*sum1;
+  long long sum2 = num[digits - 1];
+  for (int i = 0; i < digits; i++)
+  {
+    sum1 = sum1 * 10 + num[i];
+    if (i < digits - 1)
+      sum2 = sum2 * 10 + num[i];
+  }
+  return sum2 ==  2*sum1;
 }
 
 void inc(char* num, int digits)
