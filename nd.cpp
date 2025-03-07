@@ -12,30 +12,16 @@
 UnitTest::Timer chrono;
 
 
-bool check(char* num, int digits)
+bool inline check(long long num, long long exp)
 {
-  if (num[0] >= num[digits - 1])
+  int msd = (int)(num / exp);
+  int lsd = num % 10;
+
+  if (msd >= lsd)
     return false;
 
-  long long sum1 = 0;
-  long long sum2 = num[digits - 1];
-  for (int i = 0; i < digits; i++)
-  {
-    sum1 = sum1 * 10 + num[i];
-    if (i < digits - 1)
-      sum2 = sum2 * 10 + num[i];
-  }
-  return sum2 ==  2*sum1;
-}
-
-void inc(char* num, int digits)
-{
-  digits--;
-  do {
-    if (++num[digits] != 10)
-      break;
-    num[digits--] = 0;
-  } while (digits >= 0);
+  long long swapped = num - (lsd - msd) + (lsd - msd) *exp;
+  return swapped ==  2*num;
 }
 
 void print(char* num, int digits)
@@ -54,24 +40,21 @@ mlib::async_queue<task> work(NUMTHREADS);
 
 int worker()
 {
-  char num[20];
   while (1)
   {
     task todo;
     work.consume(todo);
-    memset(num, 0, sizeof(num));
-
-    num[0] = todo.start_digit;
-    while (num[0] == todo.start_digit)
+    long long exp = (long long) pow(10, todo.digits-1);
+    long long num = todo.start_digit * exp;
+    long long lim = (todo.start_digit + 1) * exp;
+    while (num < lim)
     {
-      if (check(num, todo.digits))
+      if (check(num, exp))
       {
-        std::cout << "stop" << std::endl;
-        print(num, todo.digits);
-        check(num, todo.digits);
+        std::cout << "stop " << num << std::endl;
         exit(0);
       }
-      inc(num, todo.digits);
+      ++num;
     }
     double tsec = chrono.GetTimeInMs() / 1000.;
     std::cout << "Finished job " << todo.start_digit << '-' << todo.digits 
