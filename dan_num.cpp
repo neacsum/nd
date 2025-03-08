@@ -5,7 +5,7 @@
   significant digit and place it in the most significant position, you obtain
   a number that is "n" times the original.
 
-  For instance 102564 is DAN(4) number because 102564*4 = 410256
+  For instance 102564 is a DAN(4) number because 102564*4 = 410256
 */
 #define _CRT_NONSTDC_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS 1
