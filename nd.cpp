@@ -1,3 +1,6 @@
+/*!
+  Brute force attempt to find a Dan number.
+*/
 #define _CRT_NONSTDC_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS 1
 
@@ -7,7 +10,7 @@
 #include <mlib/syncque.h>
 #include <mlib/thread.h>
 
-#define NUMTHREADS 10
+#define NUMTHREADS 9
 
 UnitTest::Timer chrono;
 
@@ -17,7 +20,7 @@ bool inline check(long long num, long long exp)
   int msd = (int)(num / exp);
   int lsd = num % 10;
 
-  if (msd >= lsd)
+  if (lsd < 2*msd)
     return false;
 
   long long swapped = num - (lsd - msd) + (lsd - msd) *exp;
