@@ -20,4 +20,4 @@ rem setup environment for Visual Studio 2017 and later
 call "%VSInstallDir%\common7\tools\vsmsbuildcmd.bat"
 
 
-if "%~1"=="" (msbuild build.proj) else (msbuild -target:%1 build.proj)
+if "%~1"=="" (msbuild build.proj) else (msbuild build.proj)

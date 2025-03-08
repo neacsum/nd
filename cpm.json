@@ -2,7 +2,7 @@
     "name": "nd",
     "git": "git@github.com:neacsum/nd.git",
     "build": [
-        {"cmd": "build.bat", "args": ["lib"]}
+        {"cmd": "build.bat"}
     ], 
     "depends": [
         {
